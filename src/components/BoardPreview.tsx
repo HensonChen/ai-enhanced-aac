@@ -11,7 +11,7 @@ export function BoardPreview({ items, onItemsChange, onUseBoard }: BoardPreviewP
   };
 
   return (
-    <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm" aria-labelledby="preview-title">
+    <section className="rounded-[2rem] border border-slate-200 bg-white p-5 pb-8 shadow-sm" aria-labelledby="preview-title">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div><p className="text-sm font-bold uppercase tracking-wide text-sky-700">Optional review</p><h2 id="preview-title" className="text-2xl font-black text-slate-950">Review generated vocabulary</h2></div>
         <div className="flex gap-2"><button type="button" onClick={addCustomItem} className="rounded-full bg-white px-4 py-2 font-bold text-slate-700 ring-1 ring-slate-300">Add custom</button><button type="button" onClick={onUseBoard} className="rounded-full bg-sky-600 px-4 py-2 font-bold text-white">Use this board</button></div>
