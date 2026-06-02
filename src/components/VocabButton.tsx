@@ -13,11 +13,13 @@ interface VocabButtonProps {
 
 const SYMBOL_LABELS: Record<string, string> = {
   cart: "SHOP",
+  grocery: "SHOP",
   store: "STORE",
   headphones: "HP",
   loud: "LOUD",
   quiet: "QUIET",
   home: "HOME",
+  go: "GO",
   help: "HELP",
   playground: "PLAY",
   play: "PLAY",
@@ -43,6 +45,7 @@ const SYMBOL_LABELS: Record<string, string> = {
   ok: "OK",
   stop: "STOP",
   storm: "TOO MUCH",
+  too: "TOO MUCH",
   message: "TALK",
 };
 
