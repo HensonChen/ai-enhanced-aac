@@ -12,7 +12,10 @@ export function VoiceInputButton({ onText, locale = "en-US" }: VoiceInputButtonP
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
 
-  useEffect(() => setSupported(isSpeechRecognitionSupported()), []);
+  useEffect(() => {
+    const id = window.setTimeout(() => setSupported(isSpeechRecognitionSupported()), 0);
+    return () => window.clearTimeout(id);
+  }, []);
 
   if (!supported) return <p className="text-xs text-slate-500">Voice input is available in Chrome/Edge. Keyboard input still works.</p>;
 

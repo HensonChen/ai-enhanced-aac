@@ -30,11 +30,14 @@ export default function Home() {
   const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
-    const loadedPrefs = loadPreferences();
-    setPreferences(loadedPrefs);
-    setComplexity(loadedPrefs.defaultComplexity);
-    setHistory(loadBoardHistory());
-    setShowOnboarding(!hasSeenOnboarding());
+    const id = window.setTimeout(() => {
+      const loadedPrefs = loadPreferences();
+      setPreferences(loadedPrefs);
+      setComplexity(loadedPrefs.defaultComplexity);
+      setHistory(loadBoardHistory());
+      setShowOnboarding(!hasSeenOnboarding());
+    }, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   const imageProvider = useMemo<ImageProvider>(() => preferences.imageProvider ?? "dalle", [preferences.imageProvider]);
@@ -93,7 +96,7 @@ export default function Home() {
     }
   }
 
-  function useBoard(board: GeneratedBoard) {
+  function activateBoard(board: GeneratedBoard) {
     setActiveBoard(board);
     setPreviewItems(board.items);
     setShowPreview(false);
@@ -125,15 +128,15 @@ export default function Home() {
         <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
           <aside className="space-y-4">
             <CaregiverInput context={context} complexity={complexity} loading={loading} onContextChange={setContext} onComplexityChange={updateComplexity} onGenerate={handleGenerate} />
-            <DemoBoardSelector onSelect={useBoard} />
-            <BoardHistory boards={history} onSelect={useBoard} />
+            <DemoBoardSelector onSelect={activateBoard} />
+            <BoardHistory boards={history} onSelect={activateBoard} />
           </aside>
 
           <section className="space-y-4">
             <SentenceStrip tokens={tokens} onSpeak={speakSentence} onClear={() => setTokens([])} onBackspace={() => setTokens((current) => current.slice(0, -1))} onRemove={(id) => setTokens((current) => current.filter((token) => token.id !== id))} />
             {error ? <div className="rounded-3xl border border-red-200 bg-red-50 p-4 font-bold text-red-700">{error}</div> : null}
             {loading ? <LoadingState /> : null}
-            {!loading && showPreview ? <BoardPreview items={previewItems} onItemsChange={setPreviewItems} onUseBoard={() => activeBoard && useBoard({ ...activeBoard, items: previewItems })} /> : null}
+            {!loading && showPreview ? <BoardPreview items={previewItems} onItemsChange={setPreviewItems} onUseBoard={() => activeBoard && activateBoard({ ...activeBoard, items: previewItems })} /> : null}
             {!loading && !showPreview ? <VocabGrid items={visibleItems} onSelect={selectItem} /> : null}
             <EmotionalPanel open={feelingsOpen} onToggle={() => setFeelingsOpen((open) => !open)} onSelect={selectItem} />
           </section>
