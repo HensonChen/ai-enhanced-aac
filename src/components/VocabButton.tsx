@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import type { VocabularyItem } from "@/types";
 import { getCategoryStyles } from "@/lib/fitzgeraldColors";
 
@@ -8,13 +11,57 @@ interface VocabButtonProps {
   showRemove?: boolean;
 }
 
+const SYMBOL_LABELS: Record<string, string> = {
+  cart: "SHOP",
+  store: "STORE",
+  headphones: "HP",
+  loud: "LOUD",
+  quiet: "QUIET",
+  home: "HOME",
+  help: "HELP",
+  playground: "PLAY",
+  play: "PLAY",
+  swing: "SWING",
+  turn: "TURN",
+  friend: "PAL",
+  water: "WATER",
+  tired: "TIRED",
+  moon: "MOON",
+  pajamas: "PJ",
+  book: "BOOK",
+  sleep: "ZZZ",
+  bathroom: "WC",
+  toothbrush: "TEETH",
+  happy: "HAPPY",
+  sad: "SAD",
+  mad: "MAD",
+  scared: "SCARED",
+  hungry: "FOOD",
+  hug: "HUG",
+  sun: "SUN",
+  time: "TIME",
+  ok: "OK",
+  stop: "STOP",
+  storm: "TOO MUCH",
+  message: "TALK",
+};
+
 function isUrl(value: string) {
   return value.startsWith("http") || value.startsWith("data:") || value.startsWith("/");
+}
+
+function displaySymbol(value: string, word: string) {
+  const bracket = value.match(/^\[(.+)]$/)?.[1];
+  const key = bracket ?? word.toLowerCase().split(/\s+/)[0];
+  return SYMBOL_LABELS[key] ?? key.slice(0, 6).toUpperCase();
 }
 
 export function VocabButton({ item, onSelect, onRemove, showRemove = false }: VocabButtonProps) {
   const styles = getCategoryStyles(item.category);
   const imageIsUrl = isUrl(item.imageUrl);
+  const [imageLoaded, setImageLoaded] = useState(!imageIsUrl);
+  const [imageFailed, setImageFailed] = useState(false);
+  const fallback = displaySymbol(item.imageUrl, item.word);
 
   return (
     <button
@@ -44,13 +91,20 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
           X
         </span>
       ) : null}
-      <div className="mb-2 flex h-16 items-center justify-center overflow-hidden rounded-2xl bg-white/75 text-3xl font-black">
-        {imageIsUrl ? (
+      <div className="relative mb-2 flex h-16 items-center justify-center overflow-hidden rounded-2xl bg-white/80 text-center">
+        <span className={`${item.isAnimated ? "animate-bounce" : ""} rounded-xl bg-slate-100 px-2 py-1 text-sm font-black tracking-wide text-slate-700 ${imageIsUrl && imageLoaded && !imageFailed ? "opacity-0" : "opacity-100"}`} aria-hidden="true">
+          {fallback}
+        </span>
+        {imageIsUrl && !imageFailed ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={item.imageUrl} alt="" className="h-full w-full object-contain" />
-        ) : (
-          <span className={item.isAnimated ? "animate-bounce" : ""} aria-hidden="true">{item.imageUrl}</span>
-        )}
+          <img
+            src={item.imageUrl}
+            alt=""
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageFailed(true)}
+            className="absolute inset-0 h-full w-full object-contain p-1"
+          />
+        ) : null}
       </div>
       <div className="text-center text-lg font-black leading-tight">{item.word}</div>
       <div className="mt-1 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">{item.type}</div>
