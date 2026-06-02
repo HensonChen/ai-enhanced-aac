@@ -95,9 +95,6 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
         </span>
       ) : null}
       <div className="relative mb-2 flex h-16 items-center justify-center overflow-hidden rounded-2xl bg-white/80 text-center">
-        <span className={`${item.isAnimated ? "animate-bounce" : ""} rounded-xl bg-slate-100 px-2 py-1 text-sm font-black tracking-wide text-slate-700 ${imageIsUrl && imageLoaded && !imageFailed ? "opacity-0" : "opacity-100"}`} aria-hidden="true">
-          {fallback}
-        </span>
         {imageIsUrl && !imageFailed ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -105,8 +102,17 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
             alt=""
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageFailed(true)}
-            className="absolute inset-0 h-full w-full object-contain p-1"
+            className="h-full max-w-full object-contain p-1"
           />
+        ) : (
+          <span className={`${item.isAnimated ? "animate-bounce" : ""} rounded-xl bg-slate-100 px-2 py-1 text-sm font-black tracking-wide text-slate-700`} aria-hidden="true">
+            {fallback}
+          </span>
+        )}
+        {imageIsUrl && !imageLoaded && !imageFailed ? (
+          <span className="absolute rounded-xl bg-slate-100 px-2 py-1 text-sm font-black tracking-wide text-slate-700" aria-hidden="true">
+            {fallback}
+          </span>
         ) : null}
       </div>
       <div className="text-center text-lg font-black leading-tight">{item.word}</div>
