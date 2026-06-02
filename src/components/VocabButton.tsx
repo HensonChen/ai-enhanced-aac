@@ -70,7 +70,7 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
     <button
       type="button"
       onClick={() => onSelect(item)}
-      className={`relative min-h-32 rounded-3xl border-4 ${styles.border} ${styles.bg} ${styles.text} p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-sky-300 active:scale-[0.98]`}
+      className={`relative min-h-32 overflow-hidden rounded-3xl border-4 ${styles.border} ${styles.bg} ${styles.text} p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-sky-300 active:scale-[0.98]`}
       aria-label={`${item.phrase}. ${styles.label}.`}
     >
       {showRemove && onRemove ? (
@@ -102,7 +102,8 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
             alt=""
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageFailed(true)}
-            className="h-full max-w-full object-contain p-1"
+            className="p-1"
+            style={{ display: "block", height: "100%", maxHeight: "100%", maxWidth: "100%", objectFit: "contain", width: "auto" }}
           />
         ) : (
           <span className={`${item.isAnimated ? "animate-bounce" : ""} rounded-xl bg-slate-100 px-2 py-1 text-sm font-black tracking-wide text-slate-700`} aria-hidden="true">
