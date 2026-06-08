@@ -1,11 +1,16 @@
 import type { CaregiverPreferences, ComplexitySettings, VocabularyItem } from "@/types";
 
-export const APP_NAME = "AI AAC Board";
+export const APP_NAME = "AI AAC Communication Board";
 
 export const DEFAULT_COMPLEXITY: ComplexitySettings = {
   level: "intermediate",
   maxButtons: 10,
   maxWordsPerPhrase: 4,
+};
+
+export const COMPLEXITY_LIMITS = {
+  maxButtons: { min: 4, max: 32 },
+  maxWordsPerPhrase: { min: 2, max: 8 },
 };
 
 export const DEFAULT_PREFERENCES: CaregiverPreferences = {

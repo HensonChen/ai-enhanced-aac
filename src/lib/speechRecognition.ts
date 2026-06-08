@@ -26,7 +26,12 @@ export function isSpeechRecognitionSupported() {
   return Boolean(speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition);
 }
 
-export function startSpeechRecognition(onText: (text: string) => void, onDone: () => void, locale = "en-US") {
+export function startSpeechRecognition(
+  onText: (text: string) => void, 
+  onDone: () => void, 
+  onError: (error: string) => void,
+  locale = "en-US"
+) {
   const speechWindow = window as SpeechWindow;
   const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
   if (!Recognition) return null;
@@ -39,7 +44,10 @@ export function startSpeechRecognition(onText: (text: string) => void, onDone: (
     const transcript = event.results[0]?.[0]?.transcript;
     if (transcript) onText(transcript);
   };
-  recognition.onerror = onDone;
+  recognition.onerror = (event: any) => {
+    console.error("Speech Recognition Error:", event.error, event);
+    onError(event.error);
+  };
   recognition.onend = onDone;
   recognition.start();
   return recognition;

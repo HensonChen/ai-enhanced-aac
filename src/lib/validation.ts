@@ -1,9 +1,10 @@
 import { z } from "zod";
+import { COMPLEXITY_LIMITS } from "./constants";
 
 export const complexitySchema = z.object({
   level: z.enum(["basic", "intermediate", "advanced"]),
-  maxButtons: z.number().int().min(4).max(20),
-  maxWordsPerPhrase: z.number().int().min(2).max(8),
+  maxButtons: z.number().int().min(COMPLEXITY_LIMITS.maxButtons.min).max(COMPLEXITY_LIMITS.maxButtons.max),
+  maxWordsPerPhrase: z.number().int().min(COMPLEXITY_LIMITS.maxWordsPerPhrase.min).max(COMPLEXITY_LIMITS.maxWordsPerPhrase.max),
 });
 
 export const generatedVocabItemSchema = z.object({
@@ -15,7 +16,7 @@ export const generatedVocabItemSchema = z.object({
 });
 
 export const generatedVocabResponseSchema = z.object({
-  items: z.array(generatedVocabItemSchema).min(1).max(20),
+  items: z.array(generatedVocabItemSchema).min(1).max(COMPLEXITY_LIMITS.maxButtons.max),
 });
 
 export const generateVocabRequestSchema = z.object({

@@ -28,6 +28,7 @@ export default function Home() {
   const [tokens, setTokens] = useState<SentenceToken[]>([]);
   const [feelingsOpen, setFeelingsOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     const id = window.setTimeout(() => {
@@ -118,21 +119,50 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-yellow-50 p-4 text-slate-950 sm:p-6 lg:p-8">
       {showOnboarding ? <OnboardingModal onClose={() => { markOnboardingSeen(); setShowOnboarding(false); }} /> : null}
-      <div className="mx-auto max-w-7xl space-y-6">
-        <header className="rounded-[2rem] bg-slate-950 p-6 text-white shadow-xl">
-          <p className="text-sm font-bold uppercase tracking-[0.25em] text-sky-200">Prototype MVP</p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{APP_NAME}</h1>
-          <p className="mt-3 max-w-3xl text-lg text-slate-200">Generate context-aware AAC vocabulary, pair it with symbols, and let children build spoken sentences by tapping large color-coded buttons.</p>
-        </header>
-
-        <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
-          <aside className="space-y-4">
-            <CaregiverInput context={context} complexity={complexity} loading={loading} onContextChange={setContext} onComplexityChange={updateComplexity} onGenerate={handleGenerate} />
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <aside className={`transition-all duration-300 ease-in-out overflow-hidden shrink-0 space-y-4 ${
+            sidebarOpen 
+              ? "w-full lg:w-[380px] opacity-100 translate-x-0" 
+              : "h-0 lg:h-auto w-full lg:w-0 opacity-0 -translate-y-4 lg:-translate-y-0 lg:-translate-x-[380px] pointer-events-none"
+          }`}>
+            <div className="rounded-3xl bg-slate-950 p-5 text-white shadow-md mb-2">
+              <h1 className="text-xl font-black tracking-tight text-white leading-tight">{APP_NAME}</h1>
+              <p className="text-xs font-medium text-slate-300 mt-1.5 leading-snug">Context-aware AAC board: build and speak sentences with color-coded buttons.</p>
+            </div>
+            <CaregiverInput context={context} complexity={complexity} loading={loading} onContextChange={setContext} onComplexityChange={updateComplexity} onGenerate={handleGenerate} locale={preferences.locale} />
             <DemoBoardSelector onSelect={activateBoard} />
             <BoardHistory boards={history} onSelect={activateBoard} />
           </aside>
 
-          <section className="space-y-4">
+          <section className="flex-1 min-w-0 space-y-4">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSidebarOpen((open) => !open)}
+                className="inline-flex items-center justify-center rounded-2xl bg-white p-3 text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50 hover:text-slate-900 active:scale-95"
+                title={sidebarOpen ? "Hide settings" : "Show settings"}
+                aria-label={sidebarOpen ? "Hide settings" : "Show settings"}
+              >
+                {sidebarOpen ? (
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  </svg>
+                ) : (
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                  </svg>
+                )}
+              </button>
+              
+              {!sidebarOpen && (
+                <div className="flex flex-col">
+                  <h1 className="text-xl font-black tracking-tight text-slate-950 leading-none">{APP_NAME}</h1>
+                  <p className="text-xs font-semibold text-slate-500 mt-1">Context-aware AAC board</p>
+                </div>
+              )}
+            </div>
+
             <SentenceStrip tokens={tokens} onSpeak={speakSentence} onClear={() => setTokens([])} onBackspace={() => setTokens((current) => current.slice(0, -1))} onRemove={(id) => setTokens((current) => current.filter((token) => token.id !== id))} />
             {error ? <div className="rounded-3xl border border-red-200 bg-red-50 p-4 font-bold text-red-700">{error}</div> : null}
             {loading ? <LoadingState count={complexity.maxButtons} /> : null}

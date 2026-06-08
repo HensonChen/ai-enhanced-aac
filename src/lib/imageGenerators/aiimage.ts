@@ -19,7 +19,7 @@ export class AIImageGenerator implements ImageGenerator {
       n: 1,
     });
 
-    console.log(result);
+    // console.log(result);
 
     const dataObj = result.data?.[0];
     if (!dataObj) return emojiFallbackImage(word);

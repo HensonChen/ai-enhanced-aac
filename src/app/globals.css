@@ -20,3 +20,8 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 button, textarea, input { font: inherit; }
+
+/* Hide Next.js devtool indicators/portals at the bottom */
+nextjs-portal, #__next-pages-button, [data-nextjs-dialog-overlay] {
+  display: none !important;
+}
