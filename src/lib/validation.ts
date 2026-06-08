@@ -29,5 +29,5 @@ export const resolveImageRequestSchema = z.object({
   isAbstract: z.boolean().default(false),
   context: z.string().max(800).optional(),
   locale: z.string().min(2).max(10).default("en"),
-  provider: z.enum(["dalle", "magnific", "iconly", "finetuned"]).optional(),
+  provider: z.enum(["gpt-image-mini", "magnific", "iconly", "finetuned"]).optional(),
 });

@@ -1,8 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { VocabularyItem } from "@/types";
 import { getCategoryStyles } from "@/lib/fitzgeraldColors";
+
+function LoadingDots() {
+  const [dots, setDots] = useState(".");
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prev) => (prev === "..." ? "." : prev + "."));
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+  return <span className="inline-block min-w-[1.25rem] text-left">{dots}</span>;
+}
 
 interface VocabButtonProps {
   item: VocabularyItem;
@@ -94,7 +105,7 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
           X
         </span>
       ) : null}
-      <div className="relative mb-2 flex h-16 items-center justify-center overflow-hidden rounded-2xl bg-white/80 text-center">
+      <div className="relative mb-2 flex h-16 items-center justify-center overflow-hidden rounded-2xl bg-white/80 text-center text-4xl">
         {imageIsUrl && !imageFailed ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -102,9 +113,17 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
             alt=""
             onLoad={() => setImageLoaded(true)}
             onError={() => setImageFailed(true)}
-            className="p-1"
+            className="p-1 text-base"
             style={{ display: "block", height: "100%", maxHeight: "100%", maxWidth: "100%", objectFit: "contain", width: "auto" }}
           />
+        ) : item.imageUrl === "[loading]" ? (
+          <span className={`${item.isAnimated ? "animate-bounce" : ""} rounded-xl bg-slate-100 px-2 py-1 text-sm font-black tracking-wide text-slate-700 text-base flex items-center gap-0.5`} aria-hidden="true">
+            Loading<LoadingDots />
+          </span>
+        ) : !item.imageUrl.startsWith("[") ? (
+          <span className={item.isAnimated ? "animate-bounce" : ""} aria-hidden="true">
+            {item.imageUrl}
+          </span>
         ) : (
           <span className={`${item.isAnimated ? "animate-bounce" : ""} rounded-xl bg-slate-100 px-2 py-1 text-sm font-black tracking-wide text-slate-700`} aria-hidden="true">
             {fallback}
@@ -117,7 +136,7 @@ export function VocabButton({ item, onSelect, onRemove, showRemove = false }: Vo
         ) : null}
       </div>
       <div className="text-center text-lg font-black leading-tight">{item.word}</div>
-      <div className="mt-1 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">{item.type}</div>
+      {/* <div className="mt-1 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">{item.type}</div> */}
     </button>
   );
 }

@@ -1,11 +1,11 @@
 import type { ImageProvider } from "@/types";
-import { DalleGenerator } from "./dalle";
+import { AIImageGenerator } from "./aiimage";
 import { FineTunedGenerator } from "./finetuned";
 import { IconlyGenerator } from "./iconly";
 import { MagnificGenerator } from "./magnific";
 import type { ImageGenerator } from "./types";
 
-export function createImageGenerator(provider: ImageProvider = "dalle"): ImageGenerator {
+export function createImageGenerator(provider: ImageProvider = "gpt-image-mini"): ImageGenerator {
   switch (provider) {
     case "magnific":
       return new MagnificGenerator();
@@ -13,9 +13,9 @@ export function createImageGenerator(provider: ImageProvider = "dalle"): ImageGe
       return new IconlyGenerator();
     case "finetuned":
       return new FineTunedGenerator();
-    case "dalle":
+    case "gpt-image-mini":
     default:
-      return new DalleGenerator();
+      return new AIImageGenerator();
   }
 }
 

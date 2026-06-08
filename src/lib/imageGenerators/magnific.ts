@@ -5,6 +5,6 @@ export class MagnificGenerator implements ImageGenerator {
   supports = { svg: true, animation: false, batchGenerate: false };
 
   async generate(): Promise<GeneratedImage> {
-    throw new Error("MagnificGenerator is not yet implemented. Set IMAGE_PROVIDER=dalle for the MVP.");
+    throw new Error("MagnificGenerator is not yet implemented. Set IMAGE_PROVIDER=gpt-image-mini for the MVP.");
   }
 }

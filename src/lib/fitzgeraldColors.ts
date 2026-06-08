@@ -8,6 +8,22 @@ export const FITZGERALD_COLORS: Record<VocabCategory, { border: string; bg: stri
   social: { border: "border-pink-500", bg: "bg-pink-50", text: "text-pink-950", label: "Social / response" },
 };
 
+export const CATEGORY_ORDER: Record<VocabCategory, number> = {
+  social: 1,      // Pink
+  emotion: 2,     // Yellow
+  verb: 3,        // Green
+  descriptor: 4,  // Blue
+  noun: 5,        // Orange
+};
+
 export function getCategoryStyles(category: VocabCategory) {
   return FITZGERALD_COLORS[category] ?? FITZGERALD_COLORS.social;
+}
+
+export function sortItemsByCategory<T extends { category: VocabCategory }>(items: T[]): T[] {
+  return [...items].sort((a, b) => {
+    const weightA = CATEGORY_ORDER[a.category] ?? 99;
+    const weightB = CATEGORY_ORDER[b.category] ?? 99;
+    return weightA - weightB;
+  });
 }

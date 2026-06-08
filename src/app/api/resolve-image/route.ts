@@ -8,17 +8,18 @@ import type { ImageProvider } from "@/types";
 export async function POST(request: Request) {
   const parsed = resolveImageRequestSchema.safeParse(await request.json());
   if (!parsed.success) return NextResponse.json({ error: "Invalid request", details: parsed.error.flatten() }, { status: 400 });
-  const { word, isAbstract, context, locale } = parsed.data;
-  const provider = (parsed.data.provider ?? process.env.IMAGE_PROVIDER ?? "dalle") as ImageProvider;
+  const { word, context, locale } = parsed.data;
+  const provider = (parsed.data.provider ?? process.env.IMAGE_PROVIDER ?? "gpt-image-mini") as ImageProvider;
   try {
-    if (!isAbstract) {
-      const arasaacImage = await findArasaacImage(word, locale);
-      if (arasaacImage) return NextResponse.json(arasaacImage);
-    }
-    if (isAbstract) {
-      const curated = curatedAbstractAnimation(word);
-      if (curated) return NextResponse.json(curated);
-    }
+    // 1. Look up ARASAAC first
+    const arasaacImage = await findArasaacImage(word, locale);
+    if (arasaacImage) return NextResponse.json(arasaacImage);
+
+    // 2. Look up curated GIFs second
+    const curated = curatedAbstractAnimation(word);
+    if (curated) return NextResponse.json(curated);
+
+    // 3. Fall back to AI image generation
     const generated = await createImageGenerator(provider).generate(word, context);
     return NextResponse.json(generated);
   } catch (error) {

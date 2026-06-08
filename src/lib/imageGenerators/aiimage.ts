@@ -2,8 +2,8 @@ import { getOpenAIClient } from "../openai";
 import { emojiFallbackImage } from "./fallbacks";
 import type { GeneratedImage, ImageGenerator } from "./types";
 
-export class DalleGenerator implements ImageGenerator {
-  name = "dalle";
+export class AIImageGenerator implements ImageGenerator {
+  name = "gpt-image-mini";
   supports = { svg: false, animation: false, batchGenerate: false };
 
   async generate(word: string, context?: string): Promise<GeneratedImage> {
@@ -12,15 +12,19 @@ export class DalleGenerator implements ImageGenerator {
 
     const prompt = `Simple, child-friendly AAC pictogram of "${word}". Flat design, bold outlines, bright colors, white background, no text, suitable for children aged 3-12. Context: ${context ?? "AAC communication board"}.`;
     const result = await client.images.generate({
-      model: "dall-e-3",
+      model: "gpt-image-1-mini",
       prompt,
       size: "1024x1024",
-      quality: "standard",
+      quality: "low",
       n: 1,
     });
 
-    const url = result.data?.[0]?.url;
+    console.log(result);
+
+    const dataObj = result.data?.[0];
+    if (!dataObj) return emojiFallbackImage(word);
+    const url = dataObj.url || (dataObj.b64_json ? `data:image/png;base64,${dataObj.b64_json}` : null);
     if (!url) return emojiFallbackImage(word);
-    return { url, source: "dalle", format: "png", isAnimated: false };
+    return { url, source: "gpt-image-mini", format: "png", isAnimated: false };
   }
 }

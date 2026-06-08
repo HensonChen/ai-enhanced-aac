@@ -1,10 +1,10 @@
 export type VocabCategory = "verb" | "noun" | "descriptor" | "emotion" | "social";
-export type ImageSource = "arasaac" | "dalle" | "magnific" | "iconly" | "finetuned" | "gif" | "emoji";
+export type ImageSource = "arasaac" | "gpt-image-mini" | "magnific" | "iconly" | "finetuned" | "gif" | "emoji";
 export type ImageFormat = "png" | "svg" | "gif" | "webp";
 export type ComplexityLevel = "basic" | "intermediate" | "advanced";
 export type LayoutMode = "same-screen" | "two-view" | "split";
 export type EmotionalPanelPosition = "bottom" | "side";
-export type ImageProvider = "dalle" | "magnific" | "iconly" | "finetuned";
+export type ImageProvider = "gpt-image-mini" | "magnific" | "iconly" | "finetuned";
 
 export interface VocabularyItem {
   id: string;

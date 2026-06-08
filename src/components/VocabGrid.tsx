@@ -1,5 +1,6 @@
 import type { VocabularyItem } from "@/types";
 import { VocabButton } from "./VocabButton";
+import { sortItemsByCategory } from "@/lib/fitzgeraldColors";
 
 interface VocabGridProps {
   items: VocabularyItem[];
@@ -15,9 +16,11 @@ export function VocabGrid({ items, onSelect }: VocabGridProps) {
     );
   }
 
+  const sortedItems = sortItemsByCategory(items);
+
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" role="list" aria-label="Vocabulary board">
-      {items.map((item) => <VocabButton key={item.id} item={item} onSelect={onSelect} />)}
+      {sortedItems.map((item) => <VocabButton key={item.id} item={item} onSelect={onSelect} />)}
     </div>
   );
 }

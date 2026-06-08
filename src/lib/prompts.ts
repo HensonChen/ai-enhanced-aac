@@ -16,10 +16,10 @@ Max buttons: ${complexity.maxButtons}
 Max words per phrase: ${complexity.maxWordsPerPhrase}
 
 Complexity rules:
-- basic: mostly complete phrases, very simple vocabulary, 6-8 items
-- intermediate: mix of individual words and phrases, 8-12 items
-- advanced: more individual word tokens for free sentence composition, nuanced vocabulary, 12-16 items
+- basic: mostly complete phrases, very simple vocabulary
+- intermediate: mix of individual words and phrases
+- advanced: more individual word tokens for free composition, nuanced vocabulary
 
-Generate no more than ${complexity.maxButtons} vocabulary items. Every phrase must be ${complexity.maxWordsPerPhrase} words or fewer unless the phrase would become grammatically confusing. Output JSON only in this shape:
+You must generate exactly ${complexity.maxButtons} vocabulary items. Every phrase must be ${complexity.maxWordsPerPhrase} words or fewer unless the phrase would become grammatically confusing. Output JSON only in this shape:
 {"items":[{"word":"headphones","phrase":"I need headphones","category":"noun","isAbstract":false,"type":"phrase"}]}`;
 }
