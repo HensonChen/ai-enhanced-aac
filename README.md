@@ -2,16 +2,22 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+Navigate to the project root folder.
+
+First, set up `.env` environmental variables of your OPENAI API key:
+```dotenv
+OPENAI_API_KEY=[YOUR API KEY]
+```
+
+Then install all required npm packages:
+```bash
+npm install
+```
+
+Finally, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
