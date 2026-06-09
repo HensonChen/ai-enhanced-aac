@@ -12,7 +12,7 @@ export function VoiceInputButton({ onText, locale = "en-US" }: VoiceInputButtonP
   const [supported, setSupported] = useState(false);
   const [listening, setListening] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<ReturnType<typeof startSpeechRecognition>>(null);
 
   useEffect(() => {
     const id = window.setTimeout(() => setSupported(isSpeechRecognitionSupported()), 0);

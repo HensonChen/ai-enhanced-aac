@@ -1,6 +1,5 @@
 import type { ComplexitySettings } from "@/types";
 import { ComplexityControls } from "./ComplexityControls";
-import { VoiceInputButton } from "./VoiceInputButton";
 import { COMPLEXITY_LIMITS } from "@/lib/constants";
 
 interface CaregiverInputProps {
@@ -13,7 +12,7 @@ interface CaregiverInputProps {
   locale?: string;
 }
 
-export function CaregiverInput({ context, complexity, loading, onContextChange, onComplexityChange, onGenerate, locale }: CaregiverInputProps) {
+export function CaregiverInput({ context, complexity, loading, onContextChange, onComplexityChange, onGenerate }: CaregiverInputProps) {
   return (
     <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm" aria-labelledby="setup-title">
       <div className="mb-4 flex items-start justify-between gap-4">

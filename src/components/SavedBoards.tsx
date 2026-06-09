@@ -9,11 +9,15 @@ interface SavedBoardsProps {
 }
 
 export function SavedBoards({ boards, onSelect, onRemove }: SavedBoardsProps) {
-  if (boards.length === 0) return null;
-
   return (
     <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm">
-      <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-500">Saved Boards</h3>
+      <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-sky-700">My Saved Customized Boards</h3>
+      <p className="mb-2 text-xs text-slate-500">Saved context boards ready to load.</p>
+      {boards.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-200 p-3 text-sm text-slate-400">
+          No saved boards yet.
+        </div>
+      ) : (
       <ul className="space-y-1.5 max-h-40 overflow-y-auto">
         {boards.map((board) => (
           <li key={board.id} className="group flex items-center gap-1">
@@ -40,6 +44,7 @@ export function SavedBoards({ boards, onSelect, onRemove }: SavedBoardsProps) {
           </li>
         ))}
       </ul>
+      )}
     </section>
   );
 }

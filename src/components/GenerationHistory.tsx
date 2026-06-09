@@ -12,7 +12,8 @@ export function GenerationHistory({ boards, onSelect }: GenerationHistoryProps) 
 
   return (
     <section className="rounded-[2rem] border border-slate-200 bg-white p-4 shadow-sm">
-      <h3 className="mb-2 text-sm font-bold uppercase tracking-wide text-slate-500">Generation History</h3>
+      <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-slate-500">Generation History</h3>
+      <p className="mb-2 text-xs text-slate-500">Open a generated board for review and editing.</p>
       <ul className="space-y-1.5 max-h-40 overflow-y-auto">
         {boards.map((board) => (
           <li key={board.id}>

@@ -42,6 +42,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [isModifying, setIsModifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [banner, setBanner] = useState<string | null>(null);
   const [tokens, setTokens] = useState<SentenceToken[]>([]);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -68,6 +69,12 @@ export default function Home() {
     return () => window.clearTimeout(id);
   }, []);
 
+  useEffect(() => {
+    if (!banner) return;
+    const id = window.setTimeout(() => setBanner(null), 2500);
+    return () => window.clearTimeout(id);
+  }, [banner]);
+
   const imageProvider = useMemo<ImageProvider>(() => preferences.imageProvider ?? "gpt-image-mini", [preferences.imageProvider]);
 
   function updateComplexity(next: typeof complexity) {
@@ -77,15 +84,27 @@ export default function Home() {
     savePreferences(nextPreferences);
   }
 
-  const resolveImages = useCallback(async (items: VocabularyItem[], boardContext: string): Promise<VocabularyItem[]> => {
+  const resolveImages = useCallback(async (
+    items: VocabularyItem[],
+    boardContext: string,
+    options?: { forceImageWords?: Set<string>; imageContext?: string },
+  ): Promise<VocabularyItem[]> => {
     return Promise.all(items.map(async (item) => {
-      const cached = getCachedImage(item.word, imageProvider);
+      const forceGenerate = options?.forceImageWords?.has(item.word.toLowerCase()) ?? false;
+      const cached = forceGenerate ? null : getCachedImage(item.word, imageProvider);
       if (cached) return { ...item, ...cached };
       try {
         const response = await fetch("/api/resolve-image", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ word: item.word, isAbstract: item.isAbstract, context: boardContext, locale: preferences.locale, provider: imageProvider }),
+          body: JSON.stringify({
+            word: item.word,
+            isAbstract: item.isAbstract,
+            context: options?.imageContext ?? boardContext,
+            locale: preferences.locale,
+            provider: imageProvider,
+            forceGenerate,
+          }),
         });
         if (!response.ok) return item;
         const image = await response.json();
@@ -139,14 +158,18 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           instruction,
-          currentItems: reviewItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role })),
-          selectedItems: selectedItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role })),
+          currentItems: reviewItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role, imageUrl: i.imageUrl, imageSource: i.imageSource, imageFormat: i.imageFormat, isAnimated: i.isAnimated })),
+          selectedItems: selectedItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role, imageUrl: i.imageUrl, imageSource: i.imageSource, imageFormat: i.imageFormat, isAnimated: i.isAnimated })),
           context: reviewContext,
         }),
       });
       if (!response.ok) throw new Error("Modification failed");
       const data = await response.json();
-      const resolved = await resolveImages(data.items, reviewContext);
+      const forceImageWords = new Set<string>((data.refreshImageWords ?? selectedItems.map((item) => item.word)).map((word: string) => word.toLowerCase()));
+      const resolved = await resolveImages(data.items, reviewContext, {
+        forceImageWords,
+        imageContext: `${reviewContext}\nCaregiver modification request: ${instruction}`,
+      });
       setReviewItems(resolved);
 
       const modifiedBoard: GeneratedBoard = {
@@ -159,6 +182,7 @@ export default function Home() {
       };
       await dbSaveToHistory(modifiedBoard);
       setGenerationHistory(await dbLoadGenerationHistory());
+      setBanner("Board updated with AI changes");
     } catch (modifyError) {
       setError(modifyError instanceof Error ? modifyError.message : "Failed to modify board");
     } finally {
@@ -171,6 +195,7 @@ export default function Home() {
     await dbSaveContextVocab(reviewItems);
     setShowReview(false);
     setTokens([]);
+    setBanner("Added to board");
   }
 
   async function handleSaveBoardFromReview() {
@@ -184,6 +209,7 @@ export default function Home() {
     };
     await dbSaveBoard(board);
     setSavedBoards(await dbLoadSavedBoards());
+    setBanner("Saved to My Boards");
   }
 
   async function handleLoadBoard(board: GeneratedBoard) {
@@ -195,6 +221,19 @@ export default function Home() {
     await dbSaveContextVocab(itemsWithRole);
     setContext(board.context);
     setShowReview(false);
+    setTokens([]);
+  }
+
+  function handleReviewHistoryBoard(board: GeneratedBoard) {
+    const itemsWithRole = board.items.map((item) => ({
+      ...item,
+      phrase: item.word,
+      role: item.role ?? inferRoleFromCategory(item.category, item.word),
+    }));
+    setReviewItems(itemsWithRole);
+    setReviewContext(board.context);
+    setContext(board.context);
+    setShowReview(true);
     setTokens([]);
   }
 
@@ -249,6 +288,8 @@ export default function Home() {
 
             <CaregiverInput context={context} complexity={complexity} loading={loading} onContextChange={setContext} onComplexityChange={updateComplexity} onGenerate={handleGenerate} locale={preferences.locale} />
 
+            <SavedBoards boards={savedBoards} onSelect={handleLoadBoard} onRemove={handleRemoveSavedBoard} />
+
             {/* Persistent vocab editor access */}
             <button
               type="button"
@@ -260,8 +301,7 @@ export default function Home() {
             </button>
 
             <DemoBoardSelector onSelect={handleLoadBoard} />
-            <GenerationHistory boards={generationHistory} onSelect={handleLoadBoard} />
-            <SavedBoards boards={savedBoards} onSelect={handleLoadBoard} onRemove={handleRemoveSavedBoard} />
+            <GenerationHistory boards={generationHistory} onSelect={handleReviewHistoryBoard} />
           </aside>
 
           {/* Main content */}
@@ -295,6 +335,7 @@ export default function Home() {
 
             <SentenceStrip tokens={tokens} onSpeak={speakSentence} onClear={() => setTokens([])} onBackspace={() => setTokens((current) => current.slice(0, -1))} onRemove={(id) => setTokens((current) => current.filter((token) => token.id !== id))} />
 
+            {banner ? <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-4 font-bold text-emerald-700">{banner}</div> : null}
             {error ? <div className="rounded-3xl border border-red-200 bg-red-50 p-4 font-bold text-red-700">{error}</div> : null}
             {loading ? <LoadingState count={complexity.maxButtons} /> : null}
 

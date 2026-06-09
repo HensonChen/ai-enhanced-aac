@@ -11,7 +11,7 @@ export const generatedVocabItemSchema = z.object({
   word: z.string().min(1).max(40),
   phrase: z.string().min(1).max(120),
   category: z.enum(["verb", "noun", "descriptor", "emotion", "social"]),
-  role: z.enum(["subject", "verb", "object"]),
+  role: z.enum(["subject", "verb", "object"]).optional(),
   isAbstract: z.boolean(),
   type: z.enum(["word", "phrase"]),
 });
@@ -32,21 +32,23 @@ export const resolveImageRequestSchema = z.object({
   context: z.string().max(800).optional(),
   locale: z.string().min(2).max(10).default("en"),
   provider: z.enum(["gpt-image-mini", "magnific", "iconly", "finetuned"]).optional(),
+  forceGenerate: z.boolean().default(false),
+});
+
+const vocabReferenceSchema = z.object({
+  word: z.string(),
+  phrase: z.string(),
+  category: z.enum(["verb", "noun", "descriptor", "emotion", "social"]),
+  role: z.enum(["subject", "verb", "object"]),
+  imageUrl: z.string().optional(),
+  imageSource: z.string().optional(),
+  imageFormat: z.string().optional(),
+  isAnimated: z.boolean().optional(),
 });
 
 export const modifyVocabRequestSchema = z.object({
   instruction: z.string().min(1).max(500),
-  currentItems: z.array(z.object({
-    word: z.string(),
-    phrase: z.string(),
-    category: z.enum(["verb", "noun", "descriptor", "emotion", "social"]),
-    role: z.enum(["subject", "verb", "object"]),
-  })),
-  selectedItems: z.array(z.object({
-    word: z.string(),
-    phrase: z.string(),
-    category: z.enum(["verb", "noun", "descriptor", "emotion", "social"]),
-    role: z.enum(["subject", "verb", "object"]),
-  })).default([]),
+  currentItems: z.array(vocabReferenceSchema),
+  selectedItems: z.array(vocabReferenceSchema).default([]),
   context: z.string().max(800).default(""),
 });
