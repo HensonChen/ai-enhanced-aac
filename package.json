@@ -10,6 +10,7 @@
     "test:e2e": "node scripts/e2e-walkthrough.mjs"
   },
   "dependencies": {
+    "idb": "^8.0.3",
     "next": "16.2.7",
     "openai": "^6.41.0",
     "react": "19.2.4",

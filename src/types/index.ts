@@ -1,4 +1,5 @@
 export type VocabCategory = "verb" | "noun" | "descriptor" | "emotion" | "social";
+export type BoardRole = "subject" | "verb" | "object";
 export type ImageSource = "arasaac" | "gpt-image-mini" | "magnific" | "iconly" | "finetuned" | "gif" | "emoji";
 export type ImageFormat = "png" | "svg" | "gif" | "webp";
 export type ComplexityLevel = "basic" | "intermediate" | "advanced";
@@ -11,6 +12,7 @@ export interface VocabularyItem {
   word: string;
   phrase: string;
   category: VocabCategory;
+  role: BoardRole;
   imageUrl: string;
   imageSource: ImageSource;
   imageFormat: ImageFormat;

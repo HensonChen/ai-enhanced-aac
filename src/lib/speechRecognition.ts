@@ -44,6 +44,7 @@ export function startSpeechRecognition(
     const transcript = event.results[0]?.[0]?.transcript;
     if (transcript) onText(transcript);
   };
+  // @ts-expect-error SpeechRecognition event handler typing mismatch
   recognition.onerror = (event: any) => {
     console.error("Speech Recognition Error:", event.error, event);
     onError(event.error);
