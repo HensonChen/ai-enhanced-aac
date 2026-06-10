@@ -19,6 +19,7 @@ export interface VocabularyItem {
   isAbstract: boolean;
   isAnimated: boolean;
   type: "word" | "phrase";
+  imageInstruction?: string;
 }
 
 export interface ComplexitySettings {

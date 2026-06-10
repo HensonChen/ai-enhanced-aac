@@ -8,6 +8,7 @@ import { getCategoryStyles } from "@/lib/fitzgeraldColors";
 interface PersistentVocabEditorProps {
   items: VocabularyItem[];
   onSave: (items: VocabularyItem[]) => void;
+  onResolveItem: (item: VocabularyItem) => Promise<VocabularyItem>;
   onClose: () => void;
 }
 
@@ -17,8 +18,9 @@ const COLUMNS: { role: BoardRole; label: string; color: string }[] = [
   { role: "object", label: "Object", color: "text-orange-700" },
 ];
 
-export function PersistentVocabEditor({ items, onSave, onClose }: PersistentVocabEditorProps) {
+export function PersistentVocabEditor({ items, onSave, onResolveItem, onClose }: PersistentVocabEditorProps) {
   const [editedItems, setEditedItems] = useState<VocabularyItem[]>(items);
+  const [resolvingIds, setResolvingIds] = useState<Set<string>>(() => new Set());
   const [showAddForm, setShowAddForm] = useState(false);
   const [newWord, setNewWord] = useState("");
   const [newRole, setNewRole] = useState<BoardRole>("object");
@@ -40,7 +42,7 @@ export function PersistentVocabEditor({ items, onSave, onClose }: PersistentVoca
       phrase: word,
       category,
       role: newRole,
-      imageUrl: word.length <= 2 ? word.toUpperCase() : `[${word}]`,
+      imageUrl: "[loading]",
       imageSource: "emoji",
       imageFormat: "png",
       isAbstract: false,
@@ -49,8 +51,25 @@ export function PersistentVocabEditor({ items, onSave, onClose }: PersistentVoca
     };
 
     setEditedItems((prev) => [...prev, newItem]);
+    setResolvingIds((prev) => new Set(prev).add(newItem.id));
     setNewWord("");
     setShowAddForm(false);
+
+    onResolveItem(newItem)
+      .then((resolvedItem) => {
+        const itemWithFallback = resolvedItem.imageUrl === "[loading]" ? { ...resolvedItem, imageUrl: `[${word}]` } : resolvedItem;
+        setEditedItems((prev) => prev.map((item) => (item.id === newItem.id ? itemWithFallback : item)));
+      })
+      .catch(() => {
+        setEditedItems((prev) => prev.map((item) => (item.id === newItem.id ? { ...item, imageUrl: `[${word}]` } : item)));
+      })
+      .finally(() => {
+        setResolvingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(newItem.id);
+          return next;
+        });
+      });
   }
 
   function resetToDefaults() {
@@ -60,6 +79,7 @@ export function PersistentVocabEditor({ items, onSave, onClose }: PersistentVoca
   }
 
   function handleSave() {
+    if (resolvingIds.size > 0) return;
     onSave(editedItems);
     onClose();
   }
@@ -67,6 +87,8 @@ export function PersistentVocabEditor({ items, onSave, onClose }: PersistentVoca
   function filterByRole(role: BoardRole) {
     return editedItems.filter((item) => item.role === role);
   }
+
+  const isResolvingImages = resolvingIds.size > 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
@@ -165,9 +187,10 @@ export function PersistentVocabEditor({ items, onSave, onClose }: PersistentVoca
           <button
             type="button"
             onClick={handleSave}
-            className="rounded-full bg-sky-600 px-5 py-2 text-sm font-bold text-white"
+            disabled={isResolvingImages}
+            className="rounded-full bg-sky-600 px-5 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            Save changes
+            {isResolvingImages ? "Resolving images..." : "Save changes"}
           </button>
         </div>
       </div>

@@ -14,6 +14,7 @@ export const generatedVocabItemSchema = z.object({
   role: z.enum(["subject", "verb", "object"]).optional(),
   isAbstract: z.boolean(),
   type: z.enum(["word", "phrase"]),
+  imageInstruction: z.string().max(500).optional(),
 });
 
 export const generatedVocabResponseSchema = z.object({
@@ -26,6 +27,13 @@ export const generateVocabRequestSchema = z.object({
   locale: z.string().min(2).max(10).default("en"),
 });
 
+const currentImageSchema = z.object({
+  imageUrl: z.string(),
+  imageSource: z.enum(["arasaac", "gpt-image-mini", "magnific", "iconly", "finetuned", "gif", "emoji"]).optional(),
+  imageFormat: z.enum(["png", "svg", "gif", "webp"]).optional(),
+  isAnimated: z.boolean().optional(),
+});
+
 export const resolveImageRequestSchema = z.object({
   word: z.string().min(1).max(80),
   isAbstract: z.boolean().default(false),
@@ -33,6 +41,8 @@ export const resolveImageRequestSchema = z.object({
   locale: z.string().min(2).max(10).default("en"),
   provider: z.enum(["gpt-image-mini", "magnific", "iconly", "finetuned"]).optional(),
   forceGenerate: z.boolean().default(false),
+  instruction: z.string().max(500).optional(),
+  currentImage: currentImageSchema.optional(),
 });
 
 const vocabReferenceSchema = z.object({
@@ -44,6 +54,7 @@ const vocabReferenceSchema = z.object({
   imageSource: z.string().optional(),
   imageFormat: z.string().optional(),
   isAnimated: z.boolean().optional(),
+  imageInstruction: z.string().optional(),
 });
 
 export const modifyVocabRequestSchema = z.object({

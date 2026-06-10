@@ -9,7 +9,7 @@ export interface GeneratedImage {
 
 export interface ImageGenerator {
   name: string;
-  generate(word: string, context?: string): Promise<GeneratedImage>;
+  generate(word: string, context?: string, instruction?: string): Promise<GeneratedImage>;
   supports: {
     svg: boolean;
     animation: boolean;

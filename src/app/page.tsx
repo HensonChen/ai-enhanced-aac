@@ -75,6 +75,12 @@ export default function Home() {
     return () => window.clearTimeout(id);
   }, [banner]);
 
+  useEffect(() => {
+    if (!error) return;
+    const id = window.setTimeout(() => setError(null), 4000);
+    return () => window.clearTimeout(id);
+  }, [error]);
+
   const imageProvider = useMemo<ImageProvider>(() => preferences.imageProvider ?? "gpt-image-mini", [preferences.imageProvider]);
 
   function updateComplexity(next: typeof complexity) {
@@ -104,6 +110,15 @@ export default function Home() {
             locale: preferences.locale,
             provider: imageProvider,
             forceGenerate,
+            instruction: item.imageInstruction,
+            currentImage: forceGenerate
+              ? {
+                  imageUrl: item.imageUrl,
+                  imageSource: item.imageSource,
+                  imageFormat: item.imageFormat,
+                  isAnimated: item.isAnimated,
+                }
+              : undefined,
           }),
         });
         if (!response.ok) return item;
@@ -158,17 +173,19 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           instruction,
-          currentItems: reviewItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role, imageUrl: i.imageUrl, imageSource: i.imageSource, imageFormat: i.imageFormat, isAnimated: i.isAnimated })),
-          selectedItems: selectedItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role, imageUrl: i.imageUrl, imageSource: i.imageSource, imageFormat: i.imageFormat, isAnimated: i.isAnimated })),
+          currentItems: reviewItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role, imageUrl: i.imageUrl, imageSource: i.imageSource, imageFormat: i.imageFormat, isAnimated: i.isAnimated, imageInstruction: i.imageInstruction })),
+          selectedItems: selectedItems.map((i) => ({ word: i.word, phrase: i.phrase, category: i.category, role: i.role, imageUrl: i.imageUrl, imageSource: i.imageSource, imageFormat: i.imageFormat, isAnimated: i.isAnimated, imageInstruction: i.imageInstruction })),
           context: reviewContext,
         }),
       });
-      if (!response.ok) throw new Error("Modification failed");
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(typeof data.error === "string" ? data.error : "Modification failed");
+      }
       const data = await response.json();
       const forceImageWords = new Set<string>((data.refreshImageWords ?? selectedItems.map((item) => item.word)).map((word: string) => word.toLowerCase()));
       const resolved = await resolveImages(data.items, reviewContext, {
         forceImageWords,
-        imageContext: `${reviewContext}\nCaregiver modification request: ${instruction}`,
       });
       setReviewItems(resolved);
 
@@ -247,6 +264,11 @@ export default function Home() {
     await dbSavePersistentVocab(items);
   }
 
+  async function handleResolvePersistentVocabItem(item: VocabularyItem) {
+    const [resolved] = await resolveImages([item], "Persistent core vocabulary for an AAC communication board.");
+    return resolved;
+  }
+
   function handleRemoveContext(id: string) {
     const updated = contextVocab.filter((item) => item.id !== id);
     setContextVocab(updated);
@@ -269,6 +291,7 @@ export default function Home() {
         <PersistentVocabEditor
           items={persistentVocab}
           onSave={handleSavePersistentVocab}
+          onResolveItem={handleResolvePersistentVocabItem}
           onClose={() => setShowPersistentEditor(false)}
         />
       ) : null}

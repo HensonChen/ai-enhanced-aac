@@ -34,9 +34,17 @@ You must generate exactly ${complexity.maxButtons} vocabulary items. Output JSON
 {"items":[{"word":"headphones","phrase":"headphones","category":"noun","role":"object","isAbstract":false,"type":"word"}]}`;
 }
 
-export function buildModifySystemPrompt() {
-  return `You modify AAC vocabulary boards for minimally-speaking children with Autism Spectrum Disorder based on caregiver instructions. Return only valid JSON with an "items" array containing the FULL modified board (not just changes).
-Each item must include: word, phrase, category, role, isAbstract, and type.
+export function buildModifySystemPrompt(soften = false) {
+  const audience = soften
+    ? "You modify AAC (augmentative and alternative communication) vocabulary boards based on caregiver instructions."
+    : "You modify AAC vocabulary boards for minimally-speaking children with Autism Spectrum Disorder based on caregiver instructions.";
+
+  return `${audience} Return only valid JSON with an "items" array containing the FULL modified board (not just changes).
+Each item must include: word, phrase, category, role, isAbstract, type, and optionally imageInstruction.
+- imageInstruction: A specific, short, focused visual description/instruction for generating the image for this item.
+  CRITICAL RULES FOR imageInstruction:
+  1. Omit this field by default. Do NOT include it for newly generated or modified words if the caregiver instruction only specifies WHAT words/categories/items to add/modify (e.g. "add more food words", "add more food words like these" (with selected items)). In these cases, leave imageInstruction out of the item completely.
+  2. Do include imageInstruction if the caregiver's instruction implies specific requirements, issues, or styling preferences about the visual appearance, composition, style, clarity, or complexity of the images (e.g. "make the image bigger", "the icon is not clear", "I don't recognize it", "the word 'bright' has too much background content", "this word looks messy", "add more words with images similar to this style"). In these cases, provide a clear, focused instruction for how to render that specific item's image to address the caregiver's visual feedback.
 The phrase must be exactly the same text as word. Do not make phrase a sentence.
 category must be one of: verb, noun, descriptor, emotion, social.
 role must be one of: subject, verb, object.
@@ -61,5 +69,5 @@ Current board items: ${currentBoard}${selectedContext}
 Caregiver instruction: "${instruction}"
 
 Return the complete modified board as JSON in this shape:
-{"items":[{"word":"headphones","phrase":"headphones","category":"noun","role":"object","isAbstract":false,"type":"word"}]}`;
+{"items":[{"word":"headphones","phrase":"headphones","category":"noun","role":"object","isAbstract":false,"type":"word","imageInstruction":"headphones worn on a head or standalone"}]}`;
 }
