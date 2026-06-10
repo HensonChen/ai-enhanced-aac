@@ -7,12 +7,16 @@ interface SpeechRecognition extends EventTarget {
   start(): void;
   stop(): void;
   onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
 }
 
 interface SpeechRecognitionEvent {
   results: ArrayLike<{ 0: { transcript: string } }>;
+}
+
+interface SpeechRecognitionErrorEvent {
+  error: string;
 }
 
 type SpeechWindow = Window & typeof globalThis & {
@@ -44,7 +48,7 @@ export function startSpeechRecognition(
     const transcript = event.results[0]?.[0]?.transcript;
     if (transcript) onText(transcript);
   };
-  recognition.onerror = (event: any) => {
+  recognition.onerror = (event) => {
     console.error("Speech Recognition Error:", event.error, event);
     onError(event.error);
   };

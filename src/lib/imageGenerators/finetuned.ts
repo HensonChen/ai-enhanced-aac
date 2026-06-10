@@ -4,7 +4,7 @@ export class FineTunedGenerator implements ImageGenerator {
   name = "finetuned";
   supports = { svg: false, animation: false, batchGenerate: true };
 
-  async generate(): Promise<GeneratedImage> {
+  async generate(word: string, context?: string, instruction?: string): Promise<GeneratedImage> {
     throw new Error("FineTunedGenerator is not yet implemented. Set IMAGE_PROVIDER=gpt-image-mini for the MVP.");
   }
 }

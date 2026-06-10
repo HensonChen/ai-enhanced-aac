@@ -4,7 +4,7 @@ export class IconlyGenerator implements ImageGenerator {
   name = "iconly";
   supports = { svg: true, animation: true, batchGenerate: false };
 
-  async generate(): Promise<GeneratedImage> {
+  async generate(word: string, context?: string, instruction?: string): Promise<GeneratedImage> {
     throw new Error("IconlyGenerator is not yet implemented. Set IMAGE_PROVIDER=gpt-image-mini for the MVP.");
   }
 }

@@ -1,9 +1,21 @@
-import type { CaregiverPreferences, GeneratedBoard, ImageProvider, VocabularyItem } from "@/types";
+import type { CaregiverPreferences, ImageProvider, VocabularyItem } from "@/types";
 import { DEFAULT_PREFERENCES } from "./constants";
 
-const BOARD_HISTORY_KEY = "aac-board-history";
+export {
+  dbLoadPersistentVocab,
+  dbSavePersistentVocab,
+  dbLoadContextVocab,
+  dbSaveContextVocab,
+  dbLoadGenerationHistory,
+  dbSaveToHistory,
+  dbLoadSavedBoards,
+  dbSaveBoard,
+  dbRemoveSavedBoard,
+  dbGetImage,
+  dbPutImage,
+} from "./db";
+
 const PREFERENCES_KEY = "aac-caregiver-preferences";
-const IMAGE_CACHE_KEY = "aac-image-cache";
 const ONBOARDING_KEY = "aac-onboarding-seen";
 
 const isBrowser = () => typeof window !== "undefined";
@@ -25,38 +37,6 @@ export function savePreferences(preferences: CaregiverPreferences) {
     window.localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
   } catch (e) {
     console.error("Failed to save caregiver preferences:", e);
-  }
-}
-
-export function loadBoardHistory(): GeneratedBoard[] {
-  if (!isBrowser()) return [];
-  try {
-    return JSON.parse(window.localStorage.getItem(BOARD_HISTORY_KEY) ?? "[]") as GeneratedBoard[];
-  } catch {
-    return [];
-  }
-}
-
-export function saveBoardToHistory(board: GeneratedBoard) {
-  if (!isBrowser() || board.isDemo) return;
-  try {
-    const withoutDuplicate = loadBoardHistory().filter((item) => item.id !== board.id);
-    const history = [board, ...withoutDuplicate];
-    
-    // Try to save up to 10 items. If quota is exceeded, degrade by saving fewer items.
-    for (let limit = 10; limit > 0; limit--) {
-      try {
-        const sliced = history.slice(0, limit);
-        window.localStorage.setItem(BOARD_HISTORY_KEY, JSON.stringify(sliced));
-        break; // Successfully saved
-      } catch (setItemError) {
-        if (limit === 1) {
-          console.warn("Storage quota exceeded. Could not save even a single board to history.", setItemError);
-        }
-      }
-    }
-  } catch (e) {
-    console.error("Failed to save board to history:", e);
   }
 }
 
@@ -82,7 +62,7 @@ type CachedImage = Pick<VocabularyItem, "imageUrl" | "imageSource" | "imageForma
 export function getCachedImage(word: string, provider: ImageProvider): CachedImage | null {
   if (!isBrowser()) return null;
   try {
-    const cache = JSON.parse(window.localStorage.getItem(IMAGE_CACHE_KEY) ?? "{}") as Record<string, CachedImage>;
+    const cache = JSON.parse(window.localStorage.getItem("aac-image-cache") ?? "{}") as Record<string, CachedImage>;
     return cache[imageCacheKey(word, provider)] ?? null;
   } catch {
     return null;
@@ -92,29 +72,13 @@ export function getCachedImage(word: string, provider: ImageProvider): CachedIma
 export function setCachedImage(word: string, provider: ImageProvider, image: CachedImage) {
   if (!isBrowser()) return;
   try {
-    const raw = window.localStorage.getItem(IMAGE_CACHE_KEY) ?? "{}";
+    const raw = window.localStorage.getItem("aac-image-cache") ?? "{}";
     const cache = JSON.parse(raw) as Record<string, CachedImage>;
     cache[imageCacheKey(word, provider)] = image;
-    
     try {
-      window.localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify(cache));
-    } catch (quotaError) {
-      console.warn("Image cache storage quota exceeded. Pruning old cache entries...", quotaError);
-      
-      // Prune: Keep only the second half of entries to make space
-      const keys = Object.keys(cache);
-      const prunedCache: Record<string, CachedImage> = {};
-      keys.slice(Math.floor(keys.length / 2)).forEach((key) => {
-        prunedCache[key] = cache[key];
-      });
-
-      try {
-        window.localStorage.setItem(IMAGE_CACHE_KEY, JSON.stringify(prunedCache));
-      } catch (retryError) {
-        // If still failing, clear the entire image cache
-        console.warn("Pruning failed. Clearing image cache completely.", retryError);
-        window.localStorage.removeItem(IMAGE_CACHE_KEY);
-      }
+      window.localStorage.setItem("aac-image-cache", JSON.stringify(cache));
+    } catch {
+      window.localStorage.removeItem("aac-image-cache");
     }
   } catch (e) {
     console.error("Failed to cache image:", e);

@@ -7,7 +7,7 @@ export function emojiFallbackImage(word: string): GeneratedImage {
   const normalized = word.toLowerCase();
   const key = Object.keys(FALLBACK_EMOJIS).find((candidate) => normalized.includes(candidate));
   return {
-    url: key ? FALLBACK_EMOJIS[key] : "[message]",
+    url: key ? FALLBACK_EMOJIS[key] : `[${word}]`,
     source: "emoji",
     format: "png",
     isAnimated: false,
